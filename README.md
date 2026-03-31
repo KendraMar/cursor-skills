@@ -6,7 +6,7 @@ Reusable [Cursor AI](https://cursor.sh) skills for UX audits and development wor
 
 | Skill | Description |
 |-------|-------------|
-| [ux-audit](ux-audit/SKILL.md) | Audit a frontend prototype for UX defects and opportunities across 5 categories: accessibility, interaction smoothness, workflow efficiency, corner case handling, and PatternFly compliance. |
+| [ux-audit](skills/ux-audit/SKILL.md) | Audit a frontend prototype for UX defects and opportunities across 5 categories: accessibility, interaction smoothness, workflow efficiency, corner case handling, and PatternFly compliance. |
 
 ## Usage
 
@@ -23,14 +23,15 @@ git clone https://github.com/KendraMar/cursor-skills.git ~/.cursor/skills
 
 ## Adding New Skills
 
-Each skill lives in its own folder with a `SKILL.md` file:
+Each skill lives in its own folder under `skills/`:
 
 ```
 cursor-skills/
-  ux-audit/
-    SKILL.md
-  your-new-skill/
-    SKILL.md
+  skills/
+    ux-audit/
+      SKILL.md
+    your-new-skill/
+      SKILL.md
 ```
 
 See the [Cursor Skills documentation](https://docs.cursor.com) for authoring guidelines.
