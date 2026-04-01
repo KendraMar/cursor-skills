@@ -7,6 +7,7 @@ Reusable [Cursor AI](https://cursor.sh) skills for UX audits and development wor
 | Skill | Description |
 |-------|-------------|
 | [ux-audit](skills/ux-audit/SKILL.md) | Audit a frontend prototype for UX defects and opportunities across 5 categories: accessibility, interaction smoothness, workflow efficiency, corner case handling, and PatternFly compliance. |
+| [jira-highlights](skills/jira-highlights/SKILL.md) | Generate monthly or sprint highlights from Jira data — queries issues by date range, groups by theme, enriches with comment detail, and produces concise stakeholder-ready bullets. |
 
 ## Usage
 
