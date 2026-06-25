@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HCC AI Assistant — UXD Evaluation Report</title>
+<style>
+  :root {
+    --red: #c00;
+    --pass: #2d7a2d;
+    --pass-bg: #edf7ed;
+    --partial: #8a5a00;
+    --partial-bg: #fff8e1;
+    --fail: #b22222;
+    --fail-bg: #fdecea;
+    --na: #555;
+    --na-bg: #f4f4f4;
+    --border: #ddd;
+    --text: #1a1a1a;
+    --muted: #555;
+    --light-bg: #fafafa;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: #fff;
+    padding: 40px 48px;
+    max-width: 900px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  .report-header { border-left: 4px solid var(--red); padding-left: 16px; margin-bottom: 28px; }
+  .report-header h1 { font-size: 22px; font-weight: 700; color: var(--text); }
+  .report-header .framework-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 12px; }
+  .meta-item { font-size: 12px; color: var(--muted); }
+  .meta-item strong { color: var(--text); }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  /* Stats */
+  .stats-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .stat-card {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 20px;
+    min-width: 110px;
+    text-align: center;
+  }
+  .stat-card .stat-value { font-size: 28px; font-weight: 700; line-height: 1.2; }
+  .stat-card .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+  .stat-card.pass .stat-value { color: var(--pass); }
+  .stat-card.partial .stat-value { color: var(--partial); }
+  .stat-card.fail .stat-value { color: var(--fail); }
+
+  /* Callout */
+  .callout {
+    background: #fff8e1;
+    border-left: 4px solid #e6a817;
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+
+  /* Section headings */
+  h2 { font-size: 16px; font-weight: 700; margin: 28px 0 14px; color: var(--text); }
+
+  /* AI response cards */
+  .response-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+  @media (max-width: 650px) { .response-grid { grid-template-columns: 1fr; } }
+  .response-card {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .response-card-header {
+    background: var(--light-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .response-card-header .task-title { font-size: 12px; font-weight: 600; color: var(--text); }
+  .response-card-header .sources-badge { font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .response-card-body { padding: 12px 14px; font-size: 12px; color: var(--muted); white-space: pre-wrap; line-height: 1.7; }
+
+  /* Scoring table */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 28px; font-size: 13px; }
+  thead tr { background: var(--light-bg); }
+  th { text-align: left; padding: 9px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); border-bottom: 2px solid var(--border); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr.row-pass td:first-child { border-left: 3px solid var(--pass); }
+  tr.row-partial td:first-child { border-left: 3px solid #e6a817; }
+  tr.row-fail td:first-child { border-left: 3px solid var(--fail); }
+
+  /* Pills */
+  .pill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+  .pill.pass { background: var(--pass-bg); color: var(--pass); }
+  .pill.partial { background: var(--partial-bg); color: var(--partial); }
+  .pill.fail { background: var(--fail-bg); color: var(--fail); }
+  .pill.na { background: var(--na-bg); color: var(--na); }
+  .pill.critical { background: var(--fail-bg); color: var(--fail); }
+  .pill.high { background: var(--partial-bg); color: var(--partial); }
+  .pill.medium { background: #e8f0fe; color: #1a5cb5; }
+
+  /* Detailed findings */
+  .dimension-block {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .dimension-header {
+    background: var(--light-bg);
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .dimension-title { font-size: 13px; font-weight: 600; }
+  .dimension-body { padding: 14px 16px; }
+  .dimension-summary { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .finding-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+  .finding-icon { font-size: 13px; font-weight: 700; width: 16px; flex-shrink: 0; margin-top: 1px; }
+  .finding-icon.pass { color: var(--pass); }
+  .finding-icon.partial { color: var(--partial); }
+  .finding-icon.fail { color: var(--fail); }
+  .finding-icon.na { color: var(--na); }
+  .finding-label { font-size: 12px; font-weight: 600; }
+  .finding-note { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  /* Recommendations */
+  .rec-item { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+  .rec-body { flex: 1; }
+  .rec-title { font-size: 13px; font-weight: 600; }
+  .rec-detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* Footer */
+  .report-footer { text-align: center; font-size: 11px; color: var(--muted); margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<!-- ── Report Header ── -->
+<div class="report-header">
+  <h1>HCC AI Assistant — UXD Evaluation Report</h1>
+  <div class="framework-label">Red Hat Agent UXD Evaluation Consolidated Framework</div>
+  <div class="meta-row">
+    <div class="meta-item"><strong>Agent:</strong> Ask Red Hat (HCC AI Assistant)</div>
+    <div class="meta-item"><strong>Environment:</strong> console.stage.redhat.com</div>
+    <div class="meta-item"><strong>Account:</strong> Insights QA</div>
+    <div class="meta-item"><strong>Date:</strong> June 23, 2026</div>
+    <div class="meta-item"><strong>Evaluator:</strong> Kendra Marchant, HCC UXD</div>
+  </div>
+</div>
+
+<hr />
+
+<!-- ── Summary Stats ── -->
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-value">6</div><div class="stat-label">Dimensions</div></div>
+  <div class="stat-card"><div class="stat-value">2</div><div class="stat-label">Tasks Run</div></div>
+  <div class="stat-card pass"><div class="stat-value">1</div><div class="stat-label">Pass</div></div>
+  <div class="stat-card partial"><div class="stat-value">4</div><div class="stat-label">Partial</div></div>
+  <div class="stat-card fail"><div class="stat-value">1</div><div class="stat-label">Fail</div></div>
+</div>
+
+<div class="callout">
+  The agent handled a docs-lookup task (T2) adequately but could not access live org data (T1), lacked disambiguation prompts for both vague queries, and showed significant gaps in conversational persona, response sizing, and trust transparency.
+</div>
+
+<!-- ── AI Responses ── -->
+<h2>AI Responses Captured</h2>
+<div class="response-grid">
+  <div class="response-card">
+    <div class="response-card-header">
+      <div class="task-title">T1: List the principals in my organization</div>
+      <div class="sources-badge">No sources</div>
+    </div>
+    <div class="response-card-body">I'm sorry, but I don't have access to information about the principals in your organization. If you have a specific question about Red Hat products, services, or documentation, I'd be happy to help with that.</div>
+  </div>
+  <div class="response-card">
+    <div class="response-card-header">
+      <div class="task-title">T2: What are the most recent changes to RBAC in my organization?</div>
+      <div class="sources-badge">2 sources cited</div>
+    </div>
+    <div class="response-card-body">The most recent changes to RBAC in your organization are related to the recent OpenShift Cluster Manager (OCM) RBAC updates. These changes affect the ability of users to view and provision clusters. Specifically:
+
+• Users may lose the ability to view and provision clusters after the recent OCM RBAC changes.
+• The error "Failed to create cluster: status is 500, code is 'CLUSTERS-MGMT-500'" may appear.
+• Only a subset of clusters (e.g., 3 out of 300) may be visible in OCM.
+• Users might see "Failed to retrieve the default configuration" when creating a new cluster.
+
+To restore access, add the "OCM Cluster Viewer" and "OCM Cluster Provisioner" roles to the "Custom default access" group. These changes can take up to 30 minutes to take effect.
+
+Source: Restoring Cluster View and Provision Access for Users After Recent OCM RBAC Changes</div>
+  </div>
+</div>
+
+<!-- ── Scoring Table ── -->
+<h2>Dimension Scores</h2>
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Framework Dimension</th>
+      <th>Rating</th>
+      <th>Key Finding</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="row-partial">
+      <td>1</td>
+      <td>Ethical Foundations &amp; Corporate Compliance</td>
+      <td><span class="pill partial">Partial</span></td>
+      <td>Data boundary respect observed in T1; full governance and bias assessment not possible from a single session.</td>
+    </tr>
+    <tr class="row-pass">
+      <td>2</td>
+      <td>Structural UI &amp; Presentation Architecture</td>
+      <td><span class="pill pass">Pass</span></td>
+      <td>Overlay drawer, header, input bar, and legal footer all present. Content formatting partially conformant.</td>
+    </tr>
+    <tr class="row-fail">
+      <td>3</td>
+      <td>Conversational Mechanics &amp; Chat Persona</td>
+      <td><span class="pill fail">Fail</span></td>
+      <td>Multiple persona and formatting failures: apologetic tone, no user name in chatbot greeting, response exceeds length constraints.</td>
+    </tr>
+    <tr class="row-partial">
+      <td>4</td>
+      <td>Trust, Disclosures &amp; Source Integrity</td>
+      <td><span class="pill partial">Partial</span></td>
+      <td>AI tagging, legal footer, and T2 source citations present. RBAC/confidence transparency and chain-of-thought absent.</td>
+    </tr>
+    <tr class="row-partial">
+      <td>5</td>
+      <td>Task Agency, Operational Safety &amp; Navigation</td>
+      <td><span class="pill partial">Partial</span></td>
+      <td>Loading indicators present. Query disambiguation absent for both vague queries. Human escalation only via docs link.</td>
+    </tr>
+    <tr class="row-partial">
+      <td>6</td>
+      <td>Guardrails, Errors &amp; Feedback Systems</td>
+      <td><span class="pill partial">Partial</span></td>
+      <td>Explicit feedback controls present. T1 refusal is total rather than partially compliant; implicit signals not testable.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ── Detailed Findings ── -->
+<h2>Detailed Findings by Dimension</h2>
+
+<!-- Dim 1 -->
+<div class="dimension-block">
+  <div class="dimension-header">
+    <div class="dimension-title">1. Ethical Foundations &amp; Corporate Compliance</div>
+    <span class="pill partial">Partial</span>
+  </div>
+  <div class="dimension-body">
+    <div class="dimension-summary">Data boundary respect observed in T1; full governance and bias assessment not possible from a single session.</div>
+    <div class="finding-row"><div class="finding-icon na">—</div><div><div class="finding-label">Accountability &amp; governance</div><div class="finding-note">Cannot assess from single interaction; no policy link surfaced.</div></div></div>
+    <div class="finding-row"><div class="finding-icon na">—</div><div><div class="finding-label">Legal compliance</div><div class="finding-note">No generative content warranting review triggered; no policy reference shown.</div></div></div>
+    <div class="finding-row"><div class="finding-icon pass">✓</div><div><div class="finding-label">Data rights &amp; control (T1)</div><div class="finding-note">Agent correctly declined to surface org principal data it doesn't have access to.</div></div></div>
+    <div class="finding-row"><div class="finding-icon na">—</div><div><div class="finding-label">Fairness &amp; bias mitigation</div><div class="finding-note">Out of scope for these two queries.</div></div></div>
+  </div>
+</div>
+
+<!-- Dim 2 -->
+<div class="dimension-block">
+  <div class="dimension-header">
+    <div class="dimension-title">2. Structural UI &amp; Presentation Architecture</div>
+    <span class="pill pass">Pass</span>
+  </div>
+  <div class="dimension-body">
+    <div class="dimension-summary">Overlay drawer, header, input bar, and legal footer all present. Content formatting partially conformant.</div>
+    <div class="finding-row"><div class="finding-icon pass">✓</div><div><div class="finding-label">Display mode — Overlay/Drawer</div><div class="finding-note">Ask Red Hat panel opens as a right-side overlay drawer over the HCC dashboard canvas.</div></div></div>
+    <div class="finding-row"><div class="finding-icon pass">✓</div><div><div class="finding-label">Header — title, model selector</div><div class="finding-note">'Ask Red Hat' title and AI Assistant dropdown are visible in the panel header.</div></div></div>
+    <div class="finding-row"><div class="finding-icon pass">✓</div><div><div class="finding-label">Footer — input bar &amp; legal notice</div><div class="finding-note">'Send a message…' textarea and 'Always review AI generated content prior to use.' footer both present.</div></div></div>
+    <div class="finding-row"><div class="finding-icon partial">~</div><div><div class="finding-label">Content prescriptions (T2)</div><div class="finding-note">T2 uses bullet lists but does NOT use Level 3 headers (###) or data tables as required for structured responses.</div></div></div>
+    <div class="finding-row"><div class="finding-icon pass">✓</div><div><div class="finding-label">Theming &amp; contrast</div><div class="finding-note">Light mode rendered with adequate contrast throughout observed session.</div></div></div>
+  </div>
+</div>
+
+<!-- Dim 3 -->
+<div class="dimension-block">
+  <div class="dimension-header">
+    <div class="dimension-title">3. Conversational Mechanics &amp; Chat Persona</div>
+    <span class="pill fail">Fail</span>
+  </div>
+  <div class="dimension-body">
+    <div class="dimension-summary">Multiple persona and formatting failures: apologetic tone, no user name in chatbot greeting, response exceeds length constraints.</div>
+    <div class="finding-row"><div class="finding-icon fail">✗</div><div><div class="finding-label">Red Hat colleague persona (T1)</div><div class="finding-note">Opened with "I'm sorry, but I don't have access…" — apologetic, robotic framing. Should use partner-first language: "I can't access principals directly — try IAM settings or let me know more context."</div></div></div>
+    <div class="finding-row"><div class="finding-icon partial">~</div><div><div class="finding-label">Technical communication style (T2)</div><div class="finding-note">T2 provides actionable steps and error codes, but leads with a summary explanation rather than concrete steps first.</div></div></div>
+    <div class="finding-row"><div class="finding-icon fail">✗</div><div><div class="finding-label">Response sizing (T2)</div><div class="finding-note">T2 response spans 8+ bullet points across multiple paragraphs, well beyond the 3-line max per message block.</div></div></div>
+    <div class="finding-row"><div class="finding-icon fail">✗</div><div><div class="finding-label">Initial conversational state</div><div class="finding-note">Chatbot welcome is a generic multilingual greeting ('Hello Hallo Hola…'), not a personalized opener addressing 'Insights QA' by name with stated capabilities.</div></div></div>
+    <div class="finding-row"><div class="finding-icon na">—</div><div><div class="finding-label">In-conversation reasoning pivots</div><div class="finding-note">No multi-turn correction scenario was tested in this session.</div></div></div>
+  </div>
+</div>
+
+<!-- Dim 4 -->
+<div class="dimension-block">
+  <div class="dimension-header">
+    <div class="dimension-title">4. Trust, Disclosures &amp; Source Integrity</div>
+    <span class="pill partial">Partial</span>
+  </div>
+  <div class="dimension-body">
+    <div class="dimension-summary">AI tagging, legal footer, and T2 source citations present. RBAC/confidence transparency and chain-of-thought absent.</div>
+    <div class="finding-row"><div class="finding-icon pass">✓</div><div><div class="finding-label">AI interaction visibility</div><div class="finding-note">Every AI message is tagged with an 'AI' badge and timestamp.</div></div></div>
+    <div class="finding-row"><div class="finding-icon pass">✓</div><div><div class="finding-label">Legal disclosure footer</div><div class="finding-note">'Always review AI generated content prior to use.' footer is persistently displayed.</div></div></div>
+    <div class="finding-row"><div class="finding-icon pass">✓</div><div><div class="finding-label">Contextual sourcing (T2)</div><div class="finding-note">T2 cites '2 sources' and links to the support article — meets the source-citation requirement.</div></div></div>
+    <div class="finding-row"><div class="finding-icon partial">~</div><div><div class="finding-label">Capability &amp; limitation disclosure (T1)</div><div class="finding-note">T1 discloses a capability gap but does NOT explain whether this is due to RBAC filtering, subscription entitlement, or a technical limitation.</div></div></div>
+    <div class="finding-row"><div class="finding-icon fail">✗</div><div><div class="finding-label">Expandable chain-of-thought</div><div class="finding-note">No expandable reasoning/planning trace UI was observed in either response.</div></div></div>
+    <div class="finding-row"><div class="finding-icon fail">✗</div><div><div class="finding-label">Confidence disclosures</div><div class="finding-note">No low-confidence visual warning shown — T2 in particular gave a generic support article answer without flagging uncertainty about org-specific applicability.</div></div></div>
+    <div class="finding-row"><div class="finding-icon fail">✗</div><div><div class="finding-label">Subscription &amp; RBAC-aware disclosure</div><div class="finding-note">T1 limitation was not attributed to RBAC or subscription filtering. A disclosure like 'Your role may limit access to this data' was absent.</div></div></div>
+  </div>
+</div>
+
+<!-- Dim 5 -->
+<div class="dimension-block">
+  <div class="dimension-header">
+    <div class="dimension-title">5. Task Agency, Operational Safety &amp; Navigation</div>
+    <span class="pill partial">Partial</span>
+  </div>
+  <div class="dimension-body">
+    <div class="dimension-summary">Loading indicators present. Query disambiguation absent for both vague queries. Human escalation only via docs link.</div>
+    <div class="finding-row"><div class="finding-icon pass">✓</div><div><div class="finding-label">Active state animations / loading</div><div class="finding-note">Typing/loading indicators fired correctly during model processing.</div></div></div>
+    <div class="finding-row"><div class="finding-icon fail">✗</div><div><div class="finding-label">Skill router toasts</div><div class="finding-note">No handoff notifications shown when the agent resolved to a support document retrieval action.</div></div></div>
+    <div class="finding-row"><div class="finding-icon fail">✗</div><div><div class="finding-label">Query disambiguation (T1)</div><div class="finding-note">'List principals' is ambiguous (users? groups? service accounts?). Should have triggered a disambiguation chip set before declining.</div></div></div>
+    <div class="finding-row"><div class="finding-icon fail">✗</div><div><div class="finding-label">Query disambiguation (T2)</div><div class="finding-note">'Most recent RBAC changes' is org-specific but the agent answered with a generic OCM article without asking for organizational context.</div></div></div>
+    <div class="finding-row"><div class="finding-icon na">—</div><div><div class="finding-label">Human-in-the-loop gates</div><div class="finding-note">Neither query triggered a state-modifying or destructive action.</div></div></div>
+    <div class="finding-row"><div class="finding-icon partial">~</div><div><div class="finding-label">Human escalation pathway</div><div class="finding-note">T2 links to a support article; no 'Open a support ticket' CTA was surfaced for the failed T1 query.</div></div></div>
+  </div>
+</div>
+
+<!-- Dim 6 -->
+<div class="dimension-block">
+  <div class="dimension-header">
+    <div class="dimension-title">6. Guardrails, Errors &amp; Feedback Systems</div>
+    <span class="pill partial">Partial</span>
+  </div>
+  <div class="dimension-body">
+    <div class="dimension-summary">Explicit feedback controls present. T1 refusal is total rather than partially compliant; implicit signals not testable.</div>
+    <div class="finding-row"><div class="finding-icon fail">✗</div><div><div class="finding-label">Partial compliance &amp; refusals (T1)</div><div class="finding-note">T1 performs a complete refusal rather than partially complying — e.g. navigating the user to IAM settings, listing what principal types it CAN enumerate, or asking clarifying questions.</div></div></div>
+    <div class="finding-row"><div class="finding-icon partial">~</div><div><div class="finding-label">Refusal transparency</div><div class="finding-note">The refusal message is polite but vague on WHY access is unavailable (see also: RBAC disclosure gap in dimension 4).</div></div></div>
+    <div class="finding-row"><div class="finding-icon pass">✓</div><div><div class="finding-label">Explicit feedback loops</div><div class="finding-note">Thumbs up/down feedback buttons are visible and accessible on each AI message.</div></div></div>
+    <div class="finding-row"><div class="finding-icon na">—</div><div><div class="finding-label">Asynchronous message validation</div><div class="finding-note">Real-time streaming safety checks not observable from UI-level testing.</div></div></div>
+    <div class="finding-row"><div class="finding-icon na">—</div><div><div class="finding-label">Implicit performance signals</div><div class="finding-note">Citation click and copy events not tracked in this evaluation session.</div></div></div>
+  </div>
+</div>
+
+<!-- ── Recommendations ── -->
+<h2>Top Recommendations</h2>
+
+<div class="rec-item">
+  <span class="pill critical" style="flex-shrink:0;margin-top:2px">Critical</span>
+  <div class="rec-body">
+    <div class="rec-title">Implement query disambiguation for ambiguous org-context queries</div>
+    <div class="rec-detail">Both T1 and T2 received vague, org-specific prompts. The agent should trigger a structured chip/button disambiguation pattern before answering or declining.</div>
+  </div>
+</div>
+
+<div class="rec-item">
+  <span class="pill critical" style="flex-shrink:0;margin-top:2px">Critical</span>
+  <div class="rec-body">
+    <div class="rec-title">Rewrite the T1 refusal response using partner-first persona language</div>
+    <div class="rec-detail">Replace "I'm sorry, but I don't have access…" with a collaborative redirect that suggests alternative paths (IAM settings, support ticket, specific docs).</div>
+  </div>
+</div>
+
+<div class="rec-item">
+  <span class="pill high" style="flex-shrink:0;margin-top:2px">High</span>
+  <div class="rec-body">
+    <div class="rec-title">Add RBAC/subscription-aware disclosure to capability limitations</div>
+    <div class="rec-detail">When the agent cannot fulfill a request, it should disclose whether the limitation is a technical boundary, an RBAC restriction, or a subscription entitlement gap.</div>
+  </div>
+</div>
+
+<div class="rec-item">
+  <span class="pill high" style="flex-shrink:0;margin-top:2px">High</span>
+  <div class="rec-body">
+    <div class="rec-title">Enforce response length limits (3 lines per message block)</div>
+    <div class="rec-detail">T2 produced 8+ bullet points in a single message. Long responses should be chunked across turns or collapsed behind an expandable control.</div>
+  </div>
+</div>
+
+<div class="rec-item">
+  <span class="pill high" style="flex-shrink:0;margin-top:2px">High</span>
+  <div class="rec-body">
+    <div class="rec-title">Add confidence disclosure when answering with generic support content</div>
+    <div class="rec-detail">T2 answered an org-specific RBAC question with a generic support article. A confidence warning is required: "This answer is based on public docs and may not reflect your org's configuration."</div>
+  </div>
+</div>
+
+<div class="rec-item">
+  <span class="pill medium" style="flex-shrink:0;margin-top:2px">Medium</span>
+  <div class="rec-body">
+    <div class="rec-title">Personalize the chatbot welcome to the authenticated user</div>
+    <div class="rec-detail">Replace the generic multilingual greeting with a personalized opener: "Hi Insights QA — I can help you with…" and explicitly state capability scope.</div>
+  </div>
+</div>
+
+<div class="rec-item">
+  <span class="pill medium" style="flex-shrink:0;margin-top:2px">Medium</span>
+  <div class="rec-body">
+    <div class="rec-title">Deploy expandable chain-of-thought and skill-router toast notifications</div>
+    <div class="rec-detail">Advanced users should be able to expand reasoning steps. When the agent hands off to a support document retrieval skill, a toast notification should fire.</div>
+  </div>
+</div>
+
+<div class="report-footer">
+  Evaluated against: Red Hat Agent UXD Evaluation Consolidated Framework &nbsp;·&nbsp; June 23, 2026 &nbsp;·&nbsp; Kendra Marchant, HCC UXD
+</div>
+
+</body>
+</html>
