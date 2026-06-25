@@ -9,6 +9,7 @@ Reusable [Cursor AI](https://cursor.sh) skills for UX audits and development wor
 | [ux-audit](skills/ux-audit/SKILL.md) | Audit a frontend prototype for UX defects and opportunities across 5 categories: accessibility, interaction smoothness, workflow efficiency, corner case handling, and PatternFly compliance. |
 | [jira-comment-writer](skills/jira-comment-writer/SKILL.md) | Draft and post structured comments on Jira tickets via the Atlassian MCP. Supports status updates, design decisions, blockers, and general notes for CPUX issues. |
 | [jira-highlights](skills/jira-highlights/SKILL.md) | Generate monthly or sprint highlights from Jira data — queries issues by date range, groups by theme, enriches with comment detail, and produces concise stakeholder-ready bullets. |
+| [evaluate-agent](skills/evaluate-agent/SKILL.md) | Run an MCP-based agent through the HCC UXD evaluation framework. Collects test tasks and access details, scores against 8 UX dimensions, and produces a structured findings report with prioritized recommendations. |
 
 ## Usage
 
